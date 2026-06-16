@@ -13,9 +13,9 @@ async function fetchDashboardData() {
     // Clear the container out before re-rendering
     dashboard.innerHTML = "";
 
-    // Fetch live data rows directly from your DashData table
+    // Fetch live data rows directly from your lowercase dashdata table
     const { data: rows, error } = await supabase
-        .from('DashData')
+        .from('dashdata')
         .select('*')
         .order('id', { ascending: true });
 
@@ -154,12 +154,12 @@ async function fetchDashboardData() {
     animateRings();
 }
 
-// Write mutations to the DashData table
+// Write mutations to the lowercase dashdata table
 async function adjustGoal(goalId, currentVal, stepAmount) {
     const updatedValue = Math.max(0, parseFloat(currentVal) + stepAmount);
 
     const { error } = await supabase
-        .from('DashData')
+        .from('dashdata')
         .update({ current: updatedValue })
         .eq('id', goalId);
 
