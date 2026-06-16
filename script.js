@@ -13,7 +13,7 @@ async function fetchDashboardData() {
     // Clear the container out before re-rendering
     dashboard.innerHTML = "";
 
-    // Fetch live data rows directly from your lowercase dashdata table
+    // Fetch live data rows directly from your dashdata table
     const { data: rows, error } = await supabase
         .from('dashdata')
         .select('*')
@@ -25,17 +25,23 @@ async function fetchDashboardData() {
         return;
     }
 
-    // Map flat database rows back into the structured format your engine expects
+    // Map flat database rows back into the structured format
     const structuredData = {
         matt: { color: "#ef8b33", goals: [] },
-        shelly: { color: "#6fd053", goals: [] },
+        shelley: { color: "#6fd053", goals: [] },
         family: { color: "#4da6ff", goals: [] }
     };
 
     rows.forEach(row => {
-        if (structuredData[row.category]) {
-            structuredData[row.category].color = row.color;
-            structuredData[row.category].goals.push({
+        // Force lowercase to ensure "Matt", "Shelley", or "Family" map correctly
+        const category = (row.category || "").toLowerCase();
+        
+        // Catch it gracefully if you spelled it "shelly" in the database
+        const targetCategory = category === "shelly" ? "shelley" : category;
+
+        if (structuredData[targetCategory]) {
+            structuredData[targetCategory].color = row.color || structuredData[targetCategory].color;
+            structuredData[targetCategory].goals.push({
                 id: row.id,
                 title: row.title,
                 current: row.current,
@@ -48,7 +54,7 @@ async function fetchDashboardData() {
     // Render Sections
     const sections = [
         { key: "matt", label: "Matt" },
-        { key: "shelly", label: "Shelley" },
+        { key: "shelley", label: "Shelley" },
         { key: "family", label: "Family" }
     ];
 
@@ -109,7 +115,8 @@ async function fetchDashboardData() {
                         const remaining = target > 0 && !isNaN(current) ? Math.max(target - current, 0) : null;
                         const remainingText = remaining === null ? "No target defined" : `${remaining.toLocaleString()} remaining`;
                         
-                        const step = goal.unit.toLowerCase() === 'miles' ? 0.5 : 1;
+                        // FIX: Safely fallback to an empty string if the database cell is completely null
+                        const step = (goal.unit || "").toLowerCase() === 'miles' ? 0.5 : 1;
 
                         return `
                             <div class="card ${completed ? "completed-card" : ""}">
@@ -123,7 +130,7 @@ async function fetchDashboardData() {
 
                                 <div class="card-info">
                                     <div class="card-subtitle">
-                                        ${completed ? "🏆 " : ""}${goal.title}
+                                        ${completed ? "🏆 " : ""}${goal.title || "Goal"}
                                     </div>
 
                                     <div class="card-main-stat">
@@ -154,9 +161,8 @@ async function fetchDashboardData() {
     animateRings();
 }
 
-// Write mutations to the lowercase dashdata table
 async function adjustGoal(goalId, currentVal, stepAmount) {
-    const updatedValue = Math.max(0, parseFloat(currentVal) + stepAmount);
+    const updatedValue = Math.max(0, parseFloat(currentVal || 0) + stepAmount);
 
     const { error } = await supabase
         .from('dashdata')
