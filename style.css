@@ -236,10 +236,9 @@ body {
   font-size: 13px;
 }
 
-/* Tablet */
+/* Tablet Layout */
 
 @media (min-width: 768px) {
-
   .app-container {
     padding: 30px;
   }
@@ -256,7 +255,6 @@ body {
 /* Large Desktop Dashboard */
 
 @media (min-width: 1400px) {
-
   #dashboard-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -297,4 +295,76 @@ body {
   .card-main-stat strong {
     font-size: 28px;
   }
+}
+
+/* --- Interactive Tapping Controls --- */
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.counter-controls {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.completed-card .counter-controls {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.adjust-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: #2a2a2c;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s ease, transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.adjust-btn:active {
+  transform: scale(0.92);
+  background: #3a3a3c;
+}
+
+.completed-card .adjust-btn {
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+}
+
+.completed-card .adjust-btn:active {
+  background: rgba(255, 255, 255, 0.4);
+}
+
+.current-value-display {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-primary);
+  min-width: 38px;
+  text-align: center;
+}
+
+.target-divider {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.completed-card .target-divider {
+  color: rgba(255, 255, 255, 0.8);
 }
