@@ -1,0 +1,300 @@
+:root {
+  --bg-dark: #000000;
+  --card-bg: #1c1c1e;
+  --text-primary: #ffffff;
+  --text-secondary: #8e8e93;
+  --ring-bg: #0b0b0c;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Helvetica, Arial, sans-serif;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+
+  background-image: radial-gradient(
+    circle at 50% -20%,
+    #1e4d15 0%,
+    #000000 50%
+  );
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.app-container {
+  width: 100%;
+  max-width: 1600px;
+  padding: 20px;
+  padding-bottom: 80px;
+}
+
+/* Header */
+
+.title-container {
+  margin-bottom: 25px;
+}
+
+.title-container h1 {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+/* Dashboard Layout */
+
+#dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Sections */
+
+.section {
+  margin-bottom: 10px;
+}
+
+.section-header {
+  margin-bottom: 15px;
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+/* Summary Card */
+
+.summary-card {
+  background: var(--card-bg);
+  border-radius: 20px;
+  padding: 18px;
+  margin-bottom: 18px;
+}
+
+.summary-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.summary-label {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.summary-percent {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.progress-bar {
+  height: 12px;
+  width: 100%;
+  background: #2a2a2c;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  transition: width 1s ease;
+}
+
+/* Goal Cards */
+
+.cards-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: 20px;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  transition: transform 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+}
+
+/* Completed Goal Cards */
+
+.completed-card {
+  background: linear-gradient(
+    135deg,
+    #D4AF37 0%,
+    #B8860B 100%
+  );
+}
+
+.completed-card .card-subtitle,
+.completed-card .card-sub-stat,
+.completed-card .card-main-stat {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.completed-card .card-main-stat strong {
+  color: white;
+}
+
+.completed-card .progress-bg {
+  stroke: rgba(255, 255, 255, 0.25);
+}
+
+.completed-card .progress-value {
+  stroke: white;
+}
+
+/* Progress Ring */
+
+.progress-ring {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+}
+
+.progress-ring svg {
+  transform: rotate(-90deg);
+}
+
+.progress-bg {
+  fill: none;
+  stroke: #2a2a2c;
+  stroke-width: 6;
+}
+
+.progress-value {
+  fill: none;
+  stroke: var(--stroke-color);
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-dasharray: 175.93;
+  stroke-dashoffset: 175.93;
+  transition: stroke-dashoffset 1s ease-in-out;
+}
+
+.progress-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* Card Info */
+
+.card-info {
+  flex: 1;
+}
+
+.card-subtitle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.card-main-stat {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.card-main-stat strong {
+  color: var(--text-primary);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.unit {
+  font-size: 15px;
+}
+
+.card-sub-stat {
+  margin-top: 5px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+/* Tablet */
+
+@media (min-width: 768px) {
+
+  .app-container {
+    padding: 30px;
+  }
+
+  .cards-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .section-title {
+    font-size: 28px;
+  }
+}
+
+/* Large Desktop Dashboard */
+
+@media (min-width: 1400px) {
+
+  #dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    align-items: start;
+  }
+
+  .section {
+    margin-bottom: 0;
+  }
+
+  .cards-container {
+    grid-template-columns: 1fr;
+  }
+
+  .section-title {
+    font-size: 30px;
+  }
+
+  .card {
+    min-height: 120px;
+  }
+
+  .progress-ring {
+    width: 85px;
+    height: 85px;
+  }
+
+  .progress-ring svg {
+    width: 85px;
+    height: 85px;
+  }
+
+  .progress-text {
+    font-size: 16px;
+  }
+
+  .card-main-stat strong {
+    font-size: 28px;
+  }
+}
