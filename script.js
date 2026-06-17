@@ -13,7 +13,7 @@ async function fetchDashboardData() {
     // Clear the container out before re-rendering
     dashboard.innerHTML = "";
 
-    // Fetch live data rows directly from your dashdata table
+    // Fetch live data rows directly from your lowercase dashdata table
     const { data: rows, error } = await supabase
         .from('dashdata')
         .select('*')
@@ -25,23 +25,19 @@ async function fetchDashboardData() {
         return;
     }
 
-    // Map flat database rows back into the structured format
+    // Map flat database rows back into the structured format your engine expects
     const structuredData = {
         matt: { color: "#ef8b33", goals: [] },
-        shelley: { color: "#6fd053", goals: [] },
+        shelly: { color: "#6fd053", goals: [] },
         family: { color: "#4da6ff", goals: [] }
     };
 
     rows.forEach(row => {
-        // Force lowercase to ensure "Matt", "Shelley", or "Family" map correctly
         const category = (row.category || "").toLowerCase();
-        
-        // Catch it gracefully if you spelled it "shelly" in the database
-        const targetCategory = category === "shelly" ? "shelley" : category;
 
-        if (structuredData[targetCategory]) {
-            structuredData[targetCategory].color = row.color || structuredData[targetCategory].color;
-            structuredData[targetCategory].goals.push({
+        if (structuredData[category]) {
+            structuredData[category].color = row.color || structuredData[category].color;
+            structuredData[category].goals.push({
                 id: row.id,
                 title: row.title,
                 current: row.current,
@@ -54,7 +50,7 @@ async function fetchDashboardData() {
     // Render Sections
     const sections = [
         { key: "matt", label: "Matt" },
-        { key: "shelley", label: "Shelley" },
+        { key: "shelly", label: "Shelley" },
         { key: "family", label: "Family" }
     ];
 
@@ -115,7 +111,7 @@ async function fetchDashboardData() {
                         const remaining = target > 0 && !isNaN(current) ? Math.max(target - current, 0) : null;
                         const remainingText = remaining === null ? "No target defined" : `${remaining.toLocaleString()} remaining`;
                         
-                        // FIX: Safely fallback to an empty string if the database cell is completely null
+                        // THE FIX: Safely handling the blank/null unit cells!
                         const step = (goal.unit || "").toLowerCase() === 'miles' ? 0.5 : 1;
 
                         return `
@@ -180,6 +176,7 @@ function animateRings() {
     const rings = document.querySelectorAll(".progress-ring");
     rings.forEach(ring => {
         const circle = ring.querySelector(".progress-value");
+        if(!circle) return;
         const radius = circle.r.baseVal.value;
         const circumference = radius * 2 * Math.PI;
 
