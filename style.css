@@ -368,3 +368,43 @@ body {
 .completed-card .target-divider {
   color: rgba(255, 255, 255, 0.8);
 }
+
+/* --- Action Buttons (Save/Cancel) --- */
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.btn-action {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 10px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.1s ease, transform 0.1s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn-action:active {
+  transform: scale(0.96);
+}
+
+.btn-cancel {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.btn-save {
+  background-color: #34c759;
+  color: #ffffff;
+}
+
+.completed-card .btn-cancel {
+  background-color: rgba(0, 0, 0, 0.2);
+  color: #ffffff;
+}
+
