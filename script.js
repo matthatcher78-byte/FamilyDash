@@ -1,5 +1,7 @@
-// Your active Google Apps Script Web App URL
 const GOOGLE_SHEET_API_URL = 'https://script.google.com/macros/s/AKfycbxwanSQRXH4ZFF7ynyS1wB8D3JESxSr6YTYWqiaXyTKY392LbNhDN1DPP1VSSghnXOnQw/exec'; 
+
+// Tracks local changes before they are saved to Google Sheets
+let pendingUpdates = {};
 
 document.addEventListener("DOMContentLoaded", () => {
     fetchDashboardData();
@@ -8,10 +10,12 @@ document.addEventListener("DOMContentLoaded", () => {
 async function fetchDashboardData() {
     const dashboard = document.getElementById("dashboard-container");
     
-    dashboard.innerHTML = "<div style='padding:20px; color: #8e8e93;'>Loading your goals from Google Sheets...</div>";
+    // Only show loading text if there is absolutely nothing on the screen yet
+    if (dashboard.innerHTML === "") {
+        dashboard.innerHTML = "<div style='padding:20px; color: #8e8e93;'>Loading your goals from Google Sheets...</div>";
+    }
 
     try {
-        // Fetch live data directly from your Google Sheet via the Web App
         const response = await fetch(GOOGLE_SHEET_API_URL);
         const rows = await response.json();
 
@@ -39,7 +43,6 @@ async function fetchDashboardData() {
             }
         });
 
-        // Render Sections
         const sections = [
             { key: "matt", label: "Matt" },
             { key: "shelley", label: "Shelley" },
@@ -57,8 +60,11 @@ async function fetchDashboardData() {
             let totalTarget = 0;
 
             goals.forEach(goal => {
-                const current = Number(goal.current);
+                // If a card has unsaved changes, use the pending value for the section totals
+                const dbCurrent = Number(goal.current);
+                const current = pendingUpdates.hasOwnProperty(goal.id) ? pendingUpdates[goal.id] : dbCurrent;
                 const target = Number(goal.target);
+                
                 if (!isNaN(current)) totalCurrent += current;
                 if (!isNaN(target)) totalTarget += target;
             });
@@ -90,7 +96,9 @@ async function fetchDashboardData() {
 
                     <div class="cards-container">
                         ${goals.map(goal => {
-                            const current = Number(goal.current);
+                            const dbCurrent = Number(goal.current);
+                            const hasPending = pendingUpdates.hasOwnProperty(goal.id);
+                            const current = hasPending ? pendingUpdates[goal.id] : dbCurrent;
                             const target = Number(goal.target);
                             let percent = null;
 
@@ -106,13 +114,13 @@ async function fetchDashboardData() {
                             const step = (goal.unit || "").toLowerCase() === 'miles' ? 0.5 : 1;
 
                             return `
-                                <div class="card ${completed ? "completed-card" : ""}">
-                                    <div class="progress-ring" data-progress="${percent ?? 0}" style="--stroke-color:${completed ? "#ffffff" : color};">
+                                <div class="card ${completed ? "completed-card" : ""}" id="card-${goal.id}">
+                                    <div class="progress-ring" id="ring-${goal.id}" data-progress="${percent ?? 0}" data-color="${color}" style="--stroke-color:${completed ? "#ffffff" : color};">
                                         <svg width="70" height="70" viewBox="0 0 70 70">
                                             <circle cx="35" cy="35" r="28" class="progress-bg"></circle>
                                             <circle cx="35" cy="35" r="28" class="progress-value"></circle>
                                         </svg>
-                                        <div class="progress-text">${displayPercent}</div>
+                                        <div class="progress-text" id="ring-text-${goal.id}">${displayPercent}</div>
                                     </div>
 
                                     <div class="card-info">
@@ -123,16 +131,21 @@ async function fetchDashboardData() {
                                         <div class="card-main-stat">
                                             <div class="stat-row">
                                                 <div class="counter-controls">
-                                                    <button class="adjust-btn minus" onclick="adjustGoal(${goal.id}, ${current}, -${step})">−</button>
-                                                    <span class="current-value-display">${current.toLocaleString()}</span>
-                                                    <button class="adjust-btn plus" onclick="adjustGoal(${goal.id}, ${current}, ${step})">+</button>
+                                                    <button class="adjust-btn minus" onclick="adjustLocalGoal(${goal.id}, ${dbCurrent}, -${step}, ${target})">−</button>
+                                                    <span class="current-value-display" id="val-display-${goal.id}">${current.toLocaleString()}</span>
+                                                    <button class="adjust-btn plus" onclick="adjustLocalGoal(${goal.id}, ${dbCurrent}, ${step}, ${target})">+</button>
                                                 </div>
                                                 <span class="target-divider">/ ${target.toLocaleString()} <span class="unit">${goal.unit || ""}</span></span>
                                             </div>
                                         </div>
 
-                                        <div class="card-sub-stat">
+                                        <div class="card-sub-stat" id="remaining-${goal.id}">
                                             ${remainingText}
+                                        </div>
+                                        
+                                        <div class="action-row" id="action-row-${goal.id}" style="display: ${hasPending ? 'flex' : 'none'};">
+                                            <button class="btn-action btn-cancel" onclick="cancelGoal(${goal.id}, ${dbCurrent}, ${target})">Cancel</button>
+                                            <button class="btn-action btn-save" id="save-btn-${goal.id}" onclick="saveGoal(${goal.id})">Save</button>
                                         </div>
                                     </div>
                                 </div>
@@ -149,63 +162,140 @@ async function fetchDashboardData() {
 
     } catch (error) {
         console.error("Error fetching from Google Sheets:", error);
-        dashboard.innerHTML = `<div style="padding:20px; color: #ff6b6b; font-weight: bold; background: rgba(255,107,107,0.1); border-radius:10px;">⚠️ Connection Error: Failed to load data from Google Sheets. Check browser console for details.</div>`;
+        dashboard.innerHTML = `<div style="padding:20px; color: #ff6b6b; font-weight: bold; background: rgba(255,107,107,0.1); border-radius:10px;">⚠️ Connection Error: Failed to load data from Google Sheets.</div>`;
     }
 }
 
-async function adjustGoal(goalId, currentVal, stepAmount) {
-    const updatedValue = Math.max(0, parseFloat(currentVal || 0) + stepAmount);
+// Handles instant, local visual changes when +/- is tapped
+function adjustLocalGoal(goalId, dbCurrent, stepAmount, target) {
+    let baseVal = pendingUpdates.hasOwnProperty(goalId) ? pendingUpdates[goalId] : dbCurrent;
+    let newVal = Math.max(0, baseVal + stepAmount);
+    pendingUpdates[goalId] = newVal;
 
-    // Give visual feedback that something is happening
-    const clickedCardId = `current-value-${goalId}`;
+    // 1. Update text fields instantly
+    document.getElementById(`val-display-${goalId}`).innerText = newVal.toLocaleString();
+
+    let remaining = target > 0 ? Math.max(target - newVal, 0) : null;
+    document.getElementById(`remaining-${goalId}`).innerText = remaining === null ? "No target defined" : `${remaining.toLocaleString()} remaining`;
+
+    // 2. Update Ring Calculations
+    let percent = (target > 0) ? Math.round((newVal / target) * 100) : 0;
+    document.getElementById(`ring-text-${goalId}`).innerText = target > 0 ? `${percent}%` : "N/A";
+
+    let ring = document.getElementById(`ring-${goalId}`);
+    if (ring) {
+        ring.dataset.progress = percent;
+        updateSingleRing(ring);
+    }
+
+    // 3. Toggle the Gold 'Completed' styling if they hit 100%
+    let card = document.getElementById(`card-${goalId}`);
+    if (card) {
+        if (percent !== null && percent >= 100) {
+            card.classList.add("completed-card");
+            if (ring) ring.style.setProperty('--stroke-color', '#ffffff');
+        } else {
+            card.classList.remove("completed-card");
+            if (ring) ring.style.setProperty('--stroke-color', ring.dataset.color);
+        }
+    }
+
+    // 4. Reveal the Save/Cancel buttons
+    document.getElementById(`action-row-${goalId}`).style.display = 'flex';
+}
+
+// Discards local changes and reverts to database numbers
+function cancelGoal(goalId, dbCurrent, target) {
+    delete pendingUpdates[goalId];
+    
+    // Reverse the visual text to original state
+    document.getElementById(`val-display-${goalId}`).innerText = dbCurrent.toLocaleString();
+    
+    let remaining = target > 0 ? Math.max(target - dbCurrent, 0) : null;
+    document.getElementById(`remaining-${goalId}`).innerText = remaining === null ? "No target defined" : `${remaining.toLocaleString()} remaining`;
+    
+    let percent = (target > 0) ? Math.round((dbCurrent / target) * 100) : 0;
+    document.getElementById(`ring-text-${goalId}`).innerText = target > 0 ? `${percent}%` : "N/A";
+    
+    let ring = document.getElementById(`ring-${goalId}`);
+    if (ring) {
+        ring.dataset.progress = percent;
+        updateSingleRing(ring);
+    }
+
+    let card = document.getElementById(`card-${goalId}`);
+    if (card) {
+        if (percent !== null && percent >= 100) {
+            card.classList.add("completed-card");
+            if (ring) ring.style.setProperty('--stroke-color', '#ffffff');
+        } else {
+            card.classList.remove("completed-card");
+            if (ring) ring.style.setProperty('--stroke-color', ring.dataset.color);
+        }
+    }
+    
+    // Hide buttons
+    document.getElementById(`action-row-${goalId}`).style.display = 'none';
+}
+
+// Pushes the finalized number to Google Sheets
+async function saveGoal(goalId) {
+    const updatedValue = pendingUpdates[goalId];
+    const saveBtn = document.getElementById(`save-btn-${goalId}`);
+    
+    // Provide visual loading feedback
+    saveBtn.innerText = "Saving...";
+    saveBtn.disabled = true;
 
     try {
-        // Pushing the update back to the Google Sheet
         const response = await fetch(GOOGLE_SHEET_API_URL, {
             method: 'POST',
-            // Formatting as text/plain prevents strict CORS errors that Google blocks
-            headers: {
-                'Content-Type': 'text/plain;charset=utf-8',
-            },
-            body: JSON.stringify({
-                id: goalId,
-                current: updatedValue
-            })
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ id: goalId, current: updatedValue })
         });
         
         const result = await response.json();
         
-        if(result.success) {
-            // Refresh UI instantly
+        if (result.success) {
+            // Successfully written to database. Clear pending tracker and run a hard refresh to recalculate the main 'Overall Progress' bars.
+            delete pendingUpdates[goalId];
             fetchDashboardData();
         } else {
-            console.error("Sheet update failed:", result);
+            console.error("Sheet update failed");
             alert("Failed to sync update to Google Sheets.");
+            saveBtn.innerText = "Save";
+            saveBtn.disabled = false;
         }
 
     } catch (error) {
         console.error("Error writing to Google Sheets:", error);
-        alert("Failed to sync update to Google Sheets. Are you online?");
+        alert("Failed to sync update. Are you online?");
+        saveBtn.innerText = "Save";
+        saveBtn.disabled = false;
     }
 }
 
+// The global animation loop run on page load
 function animateRings() {
     const rings = document.querySelectorAll(".progress-ring");
-    rings.forEach(ring => {
-        const circle = ring.querySelector(".progress-value");
-        if(!circle) return;
-        const radius = circle.r.baseVal.value;
-        const circumference = radius * 2 * Math.PI;
+    rings.forEach(ring => updateSingleRing(ring));
+}
 
-        circle.style.strokeDasharray = circumference;
-        circle.style.strokeDashoffset = circumference;
+// The isolated animation logic allowing individual rings to update when tapped
+function updateSingleRing(ring) {
+    const circle = ring.querySelector(".progress-value");
+    if(!circle) return;
+    const radius = circle.r.baseVal.value;
+    const circumference = radius * 2 * Math.PI;
 
-        const progress = parseFloat(ring.dataset.progress) || 0;
-        const cappedProgress = Math.min(progress, 100);
-        const offset = circumference - (cappedProgress / 100) * circumference;
+    circle.style.strokeDasharray = circumference;
+    circle.style.strokeDashoffset = circumference;
 
-        setTimeout(() => {
-            circle.style.strokeDashoffset = offset;
-        }, 100);
-    });
+    const progress = parseFloat(ring.dataset.progress) || 0;
+    const cappedProgress = Math.min(progress, 100);
+    const offset = circumference - (cappedProgress / 100) * circumference;
+
+    setTimeout(() => {
+        circle.style.strokeDashoffset = offset;
+    }, 50);
 }
