@@ -1,410 +1,157 @@
-:root {
-  --bg-dark: #000000;
-  --card-bg: #1c1c1e;
-  --text-primary: #ffffff;
-  --text-secondary: #8e8e93;
-  --ring-bg: #0b0b0c;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Helvetica, Arial, sans-serif;
-}
-
-body {
-  background-color: var(--bg-dark);
-  color: var(--text-primary);
-  display: flex;
-  justify-content: center;
-  min-height: 100vh;
-
-  background-image: radial-gradient(
-    circle at 50% -20%,
-    #1e4d15 0%,
-    #000000 50%
-  );
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
-
-.app-container {
-  width: 100%;
-  max-width: 1600px;
-  padding: 20px;
-  padding-bottom: 80px;
-}
-
-/* Header */
-
-.title-container {
-  margin-bottom: 25px;
-}
-
-.title-container h1 {
-  font-size: 28px;
-  font-weight: 700;
-}
-
-/* Dashboard Layout */
-
-#dashboard-container {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-}
-
-/* Sections */
-
-.section {
-  margin-bottom: 10px;
-}
-
-.section-header {
-  margin-bottom: 15px;
-}
-
-.section-title {
-  font-size: 24px;
-  font-weight: 700;
-}
-
-/* Summary Card */
-
-.summary-card {
-  background: var(--card-bg);
-  border-radius: 20px;
-  padding: 18px;
-  margin-bottom: 18px;
-}
-
-.summary-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.summary-label {
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.summary-percent {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.progress-bar {
-  height: 12px;
-  width: 100%;
-  background: #2a2a2c;
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  border-radius: 999px;
-  transition: width 1s ease;
-}
-
-/* Goal Cards */
-
-.cards-container {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 15px;
-}
+/* --- Empty States & Adding Goals --- */
 
 .card {
-  background-color: var(--card-bg);
-  border-radius: 20px;
-  padding: 15px 20px;
+  position: relative; /* Allows absolute positioning for delete button */
+}
+
+.empty-state-card, .add-another-card {
   display: flex;
-  align-items: center;
-  gap: 20px;
-  transition: transform 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-}
-
-/* Completed Goal Cards */
-
-.completed-card {
-  background: linear-gradient(
-    135deg,
-    #D4AF37 0%,
-    #B8860B 100%
-  );
-}
-
-.completed-card .card-subtitle,
-.completed-card .card-sub-stat,
-.completed-card .card-main-stat {
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.completed-card .card-main-stat strong {
-  color: white;
-}
-
-.completed-card .progress-bg {
-  stroke: rgba(255, 255, 255, 0.25);
-}
-
-.completed-card .progress-value {
-  stroke: white;
-}
-
-/* Progress Ring */
-
-.progress-ring {
-  position: relative;
-  width: 70px;
-  height: 70px;
-  flex-shrink: 0;
-}
-
-.progress-ring svg {
-  transform: rotate(-90deg);
-}
-
-.progress-bg {
-  fill: none;
-  stroke: #2a2a2c;
-  stroke-width: 6;
-}
-
-.progress-value {
-  fill: none;
-  stroke: var(--stroke-color);
-  stroke-width: 6;
-  stroke-linecap: round;
-  stroke-dasharray: 175.93;
-  stroke-dashoffset: 175.93;
-  transition: stroke-dashoffset 1s ease-in-out;
-}
-
-.progress-text {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-/* Card Info */
-
-.card-info {
-  flex: 1;
-}
-
-.card-subtitle {
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-bottom: 6px;
-  font-weight: 600;
-}
-
-.card-main-stat {
-  font-size: 18px;
-  color: var(--text-secondary);
-}
-
-.card-main-stat strong {
-  color: var(--text-primary);
-  font-size: 22px;
-  font-weight: 700;
-}
-
-.unit {
-  font-size: 15px;
-}
-
-.card-sub-stat {
-  margin-top: 5px;
-  color: var(--text-secondary);
-  font-size: 13px;
-}
-
-/* Tablet Layout */
-
-@media (min-width: 768px) {
-  .app-container {
-    padding: 30px;
-  }
-
-  .cards-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .section-title {
-    font-size: 28px;
-  }
-}
-
-/* Large Desktop Dashboard */
-
-@media (min-width: 1400px) {
-  #dashboard-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-    align-items: start;
-  }
-
-  .section {
-    margin-bottom: 0;
-  }
-
-  .cards-container {
-    grid-template-columns: 1fr;
-  }
-
-  .section-title {
-    font-size: 30px;
-  }
-
-  .card {
-    min-height: 120px;
-  }
-
-  .progress-ring {
-    width: 85px;
-    height: 85px;
-  }
-
-  .progress-ring svg {
-    width: 85px;
-    height: 85px;
-  }
-
-  .progress-text {
-    font-size: 16px;
-  }
-
-  .card-main-stat strong {
-    font-size: 28px;
-  }
-}
-
-/* --- Interactive Tapping Controls --- */
-
-.stat-row {
-  display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 4px;
-}
-
-.counter-controls {
-  display: inline-flex;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  padding: 3px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.completed-card .counter-controls {
-  background: rgba(0, 0, 0, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.adjust-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  border: none;
-  background: #2a2a2c;
-  color: var(--text-primary);
-  font-size: 18px;
-  font-weight: bold;
+  min-height: 110px;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 2px dashed rgba(255, 255, 255, 0.1);
   cursor: pointer;
+  transition: background 0.2s ease, border 0.2s ease;
+}
+
+.empty-state-card:hover, .add-another-card:hover {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 2px dashed rgba(255, 255, 255, 0.2);
+}
+
+.empty-icon {
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--text-secondary);
+}
+
+.empty-text {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* Delete Button */
+.delete-btn {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  padding: 5px;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  color: #ff453a;
+}
+
+/* --- Glassmorphism Modal Overlay --- */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
-  align-items: center;
   justify-content: center;
-  transition: background 0.1s ease, transform 0.1s ease;
-  -webkit-tap-highlight-color: transparent;
+  align-items: center;
+  z-index: 1000;
+  padding: 20px;
 }
 
-.adjust-btn:active {
-  transform: scale(0.92);
-  background: #3a3a3c;
+.modal-content {
+  background: rgba(30, 30, 32, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  border-radius: 24px;
+  padding: 30px;
+  width: 100%;
+  max-width: 400px;
 }
 
-.completed-card .adjust-btn {
-  background: rgba(255, 255, 255, 0.25);
-  color: white;
-}
-
-.completed-card .adjust-btn:active {
-  background: rgba(255, 255, 255, 0.4);
-}
-
-.current-value-display {
+.modal-content h2 {
   font-size: 22px;
-  font-weight: 700;
-  color: var(--text-primary);
-  min-width: 38px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
-.target-divider {
-  font-size: 18px;
+.input-group {
+  margin-bottom: 15px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 14px;
   color: var(--text-secondary);
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 
-.completed-card .target-divider {
-  color: rgba(255, 255, 255, 0.8);
+.input-group input {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.3);
+  color: white;
+  font-size: 16px;
+  outline: none;
+  transition: border 0.2s ease;
 }
 
-/* --- Action Buttons (Save/Cancel) --- */
+.input-group input:focus {
+  border-color: rgba(255, 255, 255, 0.3);
+}
 
-.action-row {
+.modal-actions {
   display: flex;
   gap: 10px;
-  margin-top: 15px;
+  margin-top: 25px;
 }
 
-.btn-action {
+.btn-modal {
   flex: 1;
-  padding: 8px 0;
-  border-radius: 10px;
+  padding: 12px;
+  border-radius: 12px;
   border: none;
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.1s ease, transform 0.1s ease;
-  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s ease;
 }
 
-.btn-action:active {
+.btn-modal:active {
   transform: scale(0.96);
 }
 
-.btn-cancel {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
+.btn-cancel-modal {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
 }
 
-.btn-save {
-  background-color: #34c759;
-  color: #ffffff;
+.btn-save-modal {
+  background: var(--text-primary);
+  color: var(--bg-dark);
 }
 
-.completed-card .btn-cancel {
-  background-color: rgba(0, 0, 0, 0.2);
-  color: #ffffff;
+.btn-save-alt {
+  width: 100%;
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 10px;
 }
 
+.btn-save-alt:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
