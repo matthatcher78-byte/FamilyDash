@@ -41,7 +41,6 @@ async function fetchDashboardData() {
             }
         });
 
-        // Hardcoding the default colors ensures the sections render even if the database is 100% empty
         const sections = [
             { key: "matt", label: "Matt", defaultColor: "#ef8b33" },
             { key: "shelley", label: "Shelley", defaultColor: "#6fd053" },
@@ -92,7 +91,6 @@ async function fetchDashboardData() {
                     <div class="cards-container">
             `;
 
-            // If empty, show the "First Goal" prompt. Otherwise, show cards + an "Add Another" button at the end.
             if (goals.length === 0) {
                 sectionHTML += `
                     <div class="card empty-state-card" onclick="openModal('${section.key}', '${color}')">
@@ -159,7 +157,6 @@ async function fetchDashboardData() {
                     `;
                 }).join("");
 
-                // Add Another Goal button
                 sectionHTML += `
                     <div class="card add-another-card" onclick="openModal('${section.key}', '${color}')">
                         <div class="empty-icon" style="color: ${color}">+</div>
@@ -179,8 +176,6 @@ async function fetchDashboardData() {
         dashboard.innerHTML = `<div style="padding:20px; color: #ff6b6b; font-weight: bold; background: rgba(255,107,107,0.1); border-radius:10px;">⚠️ Connection Error.</div>`;
     }
 }
-
-// --- Tracking Value Adjustments ---
 
 function adjustLocalGoal(goalId, dbCurrent, stepAmount, target) {
     let baseVal = pendingUpdates.hasOwnProperty(goalId) ? pendingUpdates[goalId] : dbCurrent;
@@ -277,13 +272,10 @@ async function saveGoal(goalId) {
     }
 }
 
-// --- Adding and Deleting Logic ---
-
 function openModal(category, color) {
     document.getElementById('modal-category').value = category;
     document.getElementById('modal-color').value = color;
     
-    // Capitalize for UI
     const titleCategory = category.charAt(0).toUpperCase() + category.slice(1);
     document.getElementById('modal-header-title').innerText = `New Goal for ${titleCategory}`;
     document.getElementById('modal-header-title').style.color = color;
@@ -332,7 +324,6 @@ async function submitNewGoal(addAnother) {
         const result = await response.json();
         if (result.success) {
             if (addAnother) {
-                // Keep open, just clear inputs
                 document.getElementById('goal-title-input').value = '';
                 document.getElementById('goal-target-input').value = '';
                 document.getElementById('goal-unit-input').value = '';
@@ -375,8 +366,6 @@ async function deleteGoal(id, title) {
         alert("Error connecting to server.");
     }
 }
-
-// --- Animation Core ---
 
 function animateRings() {
     const rings = document.querySelectorAll(".progress-ring");
