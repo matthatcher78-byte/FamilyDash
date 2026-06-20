@@ -490,26 +490,30 @@ html, body {
 }
 
 /* =========================================
-   LAYOUT 2: SNAPPED DESKTOP (Half-Window)
-   850px to 1299px
+   LAYOUT 2: SNAPPED DESKTOP (Half-Window / Laptop)
+   650px to 1299px
    - Sections sit side-by-side (3 columns)
-   - Cards switch to a vertical "widget" style so they don't crush the buttons
+   - Cards switch to a vertical "widget" style
 ========================================= */
-@media (min-width: 850px) and (max-width: 1299px) {
+@media (min-width: 650px) and (max-width: 1299px) {
+    .app-container {
+        padding: 15px; 
+    }
+
     #dashboard-container {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 15px;
+        gap: 10px; 
         align-items: start;
     }
     
     .section-title {
-        font-size: 22px;
+        font-size: 20px;
         text-align: center;
     }
     
     .summary-card {
-        padding: 15px;
+        padding: 12px;
     }
     
     .summary-top {
@@ -517,13 +521,23 @@ html, body {
         gap: 5px;
         text-align: center;
     }
+
+    .summary-label {
+        font-size: 14px;
+    }
     
     /* Converts horizontal cards to vertical widgets */
     .card {
         flex-direction: column;
         text-align: center;
-        padding: 20px 10px;
+        padding: 15px 10px;
         gap: 12px;
+    }
+
+    /* Shrink the progress ring slightly to save horizontal space */
+    .progress-ring, .progress-ring svg {
+        width: 60px;
+        height: 60px;
     }
     
     .card-info {
@@ -536,16 +550,33 @@ html, body {
     .stat-row {
         justify-content: center;
     }
+
+    /* Shrink the +/- buttons slightly to fit side-by-side */
+    .adjust-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+    }
+
+    .current-value-display {
+        font-size: 18px;
+        min-width: 30px;
+    }
     
     .action-row {
         flex-direction: column;
         width: 100%;
     }
+
+    .btn-action {
+        font-size: 13px;
+        padding: 6px 0;
+    }
     
     /* Adjusts delete button specifically for the centered widget layout */
     .delete-btn {
-        right: 10px;
-        top: 10px;
+        right: 8px;
+        top: 8px;
     }
 }
 
