@@ -11,9 +11,15 @@
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
 
-body {
+/* Base Body styling including Safari overflow protections */
+html, body {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
   background-color: var(--bg-dark);
   color: var(--text-primary);
   display: flex;
@@ -25,10 +31,11 @@ body {
 }
 
 .app-container {
-  width: 100%;
+  width: 100vw;
   max-width: 1600px;
   padding: 20px;
   padding-bottom: 80px;
+  box-sizing: border-box;
 }
 
 /* --- Header --- */
@@ -41,11 +48,12 @@ body {
   font-weight: 700;
 }
 
-/* --- Dashboard Layout --- */
+/* --- Dashboard Layout (Defaults to Mobile 1-Column) --- */
 #dashboard-container {
   display: flex;
   flex-direction: column;
   gap: 30px;
+  min-width: 0;
 }
 
 .section {
@@ -101,7 +109,7 @@ body {
   transition: width 1s ease;
 }
 
-/* --- Goal Cards --- */
+/* --- Goal Cards (Mobile Default Layout) --- */
 .cards-container {
   display: grid;
   grid-template-columns: 1fr;
@@ -113,14 +121,22 @@ body {
   border-radius: 20px;
   padding: 15px 20px;
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 20px;
   transition: transform 0.2s ease;
-  position: relative; /* Allows absolute positioning for delete button */
+  position: relative;
+  width: 100%;
+  min-width: 0;
 }
 
 .card:hover {
   transform: translateY(-2px);
+}
+
+.card-info {
+  flex: 1;
+  min-width: 0;
 }
 
 /* --- Completed Goal Cards --- */
@@ -185,11 +201,7 @@ body {
   color: var(--text-primary);
 }
 
-/* --- Card Info --- */
-.card-info {
-  flex: 1;
-}
-
+/* --- Card Info Typography --- */
 .card-subtitle {
   color: var(--text-secondary);
   font-size: 14px;
@@ -255,7 +267,6 @@ body {
   align-items: center;
   justify-content: center;
   transition: background 0.1s ease, transform 0.1s ease;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .adjust-btn:active {
@@ -305,7 +316,6 @@ body {
   font-weight: 700;
   cursor: pointer;
   transition: background 0.1s ease, transform 0.1s ease;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .btn-action:active {
@@ -358,7 +368,6 @@ body {
   color: var(--text-secondary);
 }
 
-/* Delete Button */
 .delete-btn {
   position: absolute;
   top: 12px;
@@ -371,6 +380,7 @@ body {
   opacity: 0.5;
   transition: opacity 0.2s;
   padding: 5px;
+  z-index: 10;
 }
 
 .delete-btn:hover {
@@ -479,60 +489,107 @@ body {
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* --- Responsive Layout (Tablet & Desktop) --- */
-@media (min-width: 768px) {
-  .app-container {
-    padding: 30px;
-  }
-
-  .cards-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .section-title {
-    font-size: 28px;
-  }
+/* =========================================
+   LAYOUT 2: SNAPPED DESKTOP (Half-Window)
+   850px to 1299px
+   - Sections sit side-by-side (3 columns)
+   - Cards switch to a vertical "widget" style so they don't crush the buttons
+========================================= */
+@media (min-width: 850px) and (max-width: 1299px) {
+    #dashboard-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        align-items: start;
+    }
+    
+    .section-title {
+        font-size: 22px;
+        text-align: center;
+    }
+    
+    .summary-card {
+        padding: 15px;
+    }
+    
+    .summary-top {
+        flex-direction: column;
+        gap: 5px;
+        text-align: center;
+    }
+    
+    /* Converts horizontal cards to vertical widgets */
+    .card {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px 10px;
+        gap: 12px;
+    }
+    
+    .card-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+    }
+    
+    .stat-row {
+        justify-content: center;
+    }
+    
+    .action-row {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    /* Adjusts delete button specifically for the centered widget layout */
+    .delete-btn {
+        right: 10px;
+        top: 10px;
+    }
 }
 
-@media (min-width: 1400px) {
-  #dashboard-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 30px;
-    align-items: start;
-  }
-
-  .section {
-    margin-bottom: 0;
-  }
-
-  .cards-container {
-    grid-template-columns: 1fr;
-  }
-
-  .section-title {
-    font-size: 30px;
-  }
-
-  .card {
-    min-height: 120px;
-  }
-
-  .progress-ring {
-    width: 85px;
-    height: 85px;
-  }
-
-  .progress-ring svg {
-    width: 85px;
-    height: 85px;
-  }
-
-  .progress-text {
-    font-size: 16px;
-  }
-
-  .card-main-stat strong {
-    font-size: 28px;
-  }
+/* =========================================
+   LAYOUT 3: FULL DESKTOP WIDESCREEN
+   1300px and up
+   - Sections sit side-by-side (3 columns)
+   - Cards stretch out horizontally with plenty of space
+========================================= */
+@media (min-width: 1300px) {
+    .app-container {
+        padding: 40px;
+    }
+    
+    #dashboard-container {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+        align-items: start;
+    }
+    
+    .section-title {
+        font-size: 30px;
+    }
+    
+    .card {
+        min-height: 120px;
+    }
+    
+    .progress-ring {
+        width: 85px;
+        height: 85px;
+    }
+    
+    .progress-ring svg {
+        width: 85px;
+        height: 85px;
+    }
+    
+    .progress-text {
+        font-size: 16px;
+    }
+    
+    .card-main-stat strong {
+        font-size: 28px;
+    }
 }
